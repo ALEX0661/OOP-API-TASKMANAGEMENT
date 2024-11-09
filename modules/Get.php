@@ -9,7 +9,7 @@ class Get {
 
     public function getTaskinfo($task_id = null)
     {
-        $sqlString = "SELECT * FROM tsk_mngmnt";
+        $sqlString = "SELECT * FROM task";
         if ($task_id !== null) {
             $sqlString .= " WHERE task_id = " . $task_id;
         }
