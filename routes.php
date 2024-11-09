@@ -21,9 +21,9 @@ switch ($_SERVER['REQUEST_METHOD']) {
         switch ($request[0]) {
             case 'gettasks':
                 if (count($request) > 1) {
-                    echo json_encode($Get->getTaskInfo($request[1]));
+                    echo json_encode($Get->getTaskinfo($request[1]));
                 } else {
-                    echo json_encode($Get->getTaskInfo());
+                    echo json_encode($Get->getTaskinfo());
                 }
                 break;
             default:
