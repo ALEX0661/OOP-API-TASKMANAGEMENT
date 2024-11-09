@@ -1,13 +1,11 @@
 <?php
 class Get
 {
-    protected $gm;
     protected $pdo;
 
     public function __construct(\PDO $pdo)
     {
-        $this->gm = new GlobalMethods($pdo);
-        $this->pdo = $pdo;
+        $this->pdo = $pdo
     }
 
     public function getTaskinfo($task_id = null)
