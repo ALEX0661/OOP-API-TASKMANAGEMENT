@@ -1,16 +1,15 @@
 <?php
-class Get
-{
+class Get {
     protected $pdo;
 
-    public function __construct(\PDO $pdo)
-    {
-        $this->pdo = $pdo
+    public function __construct(\PDO $pdo) {
+        $this->pdo = $pdo;
     }
+    
 
     public function getTaskinfo($task_id = null)
     {
-        $sqlString = "SELECT * FROM Tsk_Mngmnt";
+        $sqlString = "SELECT * FROM tsk_mngmnt";
         if ($task_id !== null) {
             $sqlString .= " WHERE task_id = " . $task_id;
         }
@@ -40,3 +39,4 @@ class Get
     }
 }
 ?>
+                                
