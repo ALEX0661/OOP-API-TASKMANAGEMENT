@@ -7,7 +7,7 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 date_default_timezone_set("Asia/Manila");
 
 define("DB_SERVER", "localhost");
-define("DB_NAME", "Tsk_Mngmnt");
+define("DB_NAME", "tsk_mngmnt");
 define("DB_USER", "root");
 define("DB_PWORD", "");
 
