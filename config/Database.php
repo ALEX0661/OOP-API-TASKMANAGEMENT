@@ -12,9 +12,12 @@ define("DB_USER", "root");
 define("DB_PWORD", "");
 
 class Connection {
+    private $connectionstring;
+    private $options;
+
     public function __construct() {
-        protected $connectionstring = "mysql:host=" . DB_SERVER . ";dbname=" . DB_NAME . ";charset=utf8";
-        protected $options = [
+        $this->connectionstring = "mysql:host=" . DB_SERVER . ";dbname=" . DB_NAME . ";charset=utf8";
+        $this->options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES => false
@@ -22,8 +25,7 @@ class Connection {
     }
 
     public function connect() {
-            return new \PDO($this->connectionstring, DB_USER, DB_PWORD, $this->options);
-        }
+        return new \PDO($this->connectionstring, DB_USER, DB_PWORD, $this->options);
     }
 }
 ?>
