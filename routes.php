@@ -33,7 +33,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         break;
 
 /*
-    case 'GET':
+    case 'POST':
         switch ($request[0]) {
             case 'posttasks':
                 if (count($request) > 1) {
