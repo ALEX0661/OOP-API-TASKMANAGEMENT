@@ -32,6 +32,42 @@ switch ($_SERVER['REQUEST_METHOD']) {
         }
         break;
 
+/*
+    case 'GET':
+        switch ($request[0]) {
+            case 'posttasks':
+                if (count($request) > 1) {
+                    echo json_encode($Get->getTaskinfo($request[1]));
+                } else {
+                    echo json_encode($Get->getTaskinfo());
+                }
+                break;
+
+            case 'updatetasks':
+                if (count($request) > 1) {
+                    echo json_encode($Get->getTaskinfo($request[1]));
+                } else {
+                    echo json_encode($Get->getTaskinfo());
+                }
+                break;
+
+
+            case 'deletetasks':
+                if (count($request) > 1) {
+                    echo json_encode($Get->getTaskinfo($request[1]));
+                } else {
+                    echo json_encode($Get->getTaskinfo());
+                }
+                break;
+
+
+            default:
+                echo "Invalid request.";
+                break;
+
+        }
+        break;
+*/
     default:
         echo "Forbidden";
         break;
