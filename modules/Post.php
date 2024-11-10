@@ -1,18 +1,24 @@
 <?php
 class Post{
-    public function postStudents(){
-        //code for retrieving data on DB
-        return "This is some student records added.";
+    protected $pdo;
+
+    public function __construct(\PDO $pdo) {
+        $this->pdo = $pdo;
     }
 
-    public function postClasses(){
+    public function postTask(){
         //code for retrieving data on DB
-        return "This is some classes records added.";
+        return "Task Created";
     }
 
-    public function postFaculty(){
+    public function updateTask(){
         //code for retrieving data on DB
-        return "This is some faculty records added.";
+        return "Task Updated";
+    }
+
+    public function deleteTask(){
+        //code for retrieving data on DB
+        return "Task deleted";
     }
 }
 
