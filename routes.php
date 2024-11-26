@@ -4,16 +4,17 @@ require_once "./modules/Get.php";
 require_once "./modules/Post.php";
 require_once "./modules/Patch.php";
 require_once "./modules/Delete.php";
-require_once "./modules/Auth.php";
+require_once "./modules/Authentication.php";
+
 
 $db = new Connection();
 $pdo = $db->connect();
 
-$get = new Get($pdo);
-$post = new Post($pdo);
-$patch = new Patch($pdo);
-$delete = new Delete($pdo);
-$auth = new Authentication($pdo);
+$Get = new Get($pdo);
+$Post = new Post($pdo);
+$Patch = new Patch($pdo);
+$Delete = new Delete($pdo);
+$Auth = new Authentication($pdo);
 
 if (isset($_REQUEST['request'])) {
     $request = explode("/", $_REQUEST['request']);
@@ -22,80 +23,62 @@ if (isset($_REQUEST['request'])) {
     exit;
 }
 
-$body = json_decode(file_get_contents("php://input"));
-
 switch ($_SERVER['REQUEST_METHOD']) {
     case 'GET':
         switch ($request[0]) {
-            case 'tasks':
+            case 'gettasks':
                 if (count($request) > 1) {
-                    echo json_encode($get->getTaskInfo($request[1]));
+                    echo json_encode($Get->getTaskinfo($request[1]));
                 } else {
-                    echo json_encode($get->getTaskInfo());
+                    echo json_encode($Get->getTaskinfo());
                 }
                 break;
             default:
-                http_response_code(401);
-                echo "Invalid endpoint.";
+                echo "Invalid request.";
                 break;
         }
         break;
 
     case 'POST':
         switch ($request[0]) {
-            case 'login':
-                echo json_encode($auth->login($body));
-                break;
-            case 'user':
-                echo json_encode($auth->addAccount($body));
-                break;
-            case 'tasks':
-                echo json_encode($post->postTasks($body));
+            case 'posttasks':
+                $body = json_decode(file_get_contents("php://input"));
+                echo json_encode($Post->postTask($body));
                 break;
             default:
-                http_response_code(401);
-                echo "Invalid endpoint.";
+                echo "Invalid request.";
                 break;
         }
         break;
 
     case 'PATCH':
+        $body = json_decode(file_get_contents("php://input"));
         switch ($request[0]) {
-            case 'tasks':
-                if (count($request) > 1) {
-                    echo json_encode($patch->updateTask($body, $request[1]));
-                } else {
-                    http_response_code(400);
-                    echo "Task ID is required for update.";
-                }
+            case 'updatetasks':
+                echo json_encode($Patch->updateTask($body, $request[1]));
+                break;
+            case 'archivetask':
+                echo json_encode($Patch->archiveTask($request[1]));
                 break;
             default:
-                http_response_code(401);
-                echo "Invalid endpoint.";
+                echo "Invalid request.";
                 break;
         }
         break;
 
     case 'DELETE':
         switch ($request[0]) {
-            case 'tasks':
-                if (count($request) > 1) {
-                    echo json_encode($delete->deleteTask($request[1]));
-                } else {
-                    http_response_code(400);
-                    echo "Task ID is required for deletion.";
-                }
+            case 'deletetasks':
+                echo json_encode($Delete->deleteTask($request[1]));
                 break;
             default:
-                http_response_code(401);
-                echo "Invalid endpoint.";
+                echo "Invalid request.";
                 break;
         }
         break;
 
     default:
-        http_response_code(400);
-        echo "Invalid Request Method.";
+        echo "Forbidden";
         break;
 }
 ?>
