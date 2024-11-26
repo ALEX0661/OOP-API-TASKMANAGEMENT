@@ -6,7 +6,6 @@ class Patch {
         $this->pdo = $pdo;
     }
 
-    // Method to update task details
     public function updateTask($body, $task_id) {
         $values = [];
         $errmsg = "";
@@ -36,7 +35,6 @@ class Patch {
         return array("errmsg" => $errmsg, "code" => $code);
     }
 
-    // Method to archive (soft delete) a task
     public function archiveTask($task_id) {
         $errmsg = "";
         $code = 0;
