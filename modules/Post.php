@@ -16,7 +16,7 @@ class Post {
         }
 
         try {
-            $sqlString = "INSERT INTO tasks_tbl (task_id, title, description, priority, status, due_date, created_at, updated_at) 
+            $sqlString = "INSERT INTO tasks (task_id, title, description, priority, status, due_date, created_at, updated_at) 
                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             $sql = $this->pdo->prepare($sqlString);
             $sql->execute($values);
