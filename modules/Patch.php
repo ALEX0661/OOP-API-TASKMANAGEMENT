@@ -7,7 +7,7 @@ class Patch {
     }
 
     // Method to update task details
-    public function patchTask($body, $task_id) {
+    public function updateTask($body, $task_id) {
         $values = [];
         $errmsg = "";
         $code = 0;
