@@ -18,7 +18,7 @@ class Patch {
         array_push($values, $task_id);
 
         try {
-            $sqlString = "UPDATE task SET title = ?, description = ?, priority = ?, status = ?, due_date = ?, updated_at = ? 
+            $sqlString = "UPDATE task SET title = ?, description = ?, priority = ?, status = ?, updated_at = ?, due_date = ?, updated_at = ? 
                           WHERE task_id = ?";
             $sql = $this->pdo->prepare($sqlString);
             $sql->execute($values);
