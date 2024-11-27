@@ -4,7 +4,7 @@ require_once "./modules/Get.php";
 require_once "./modules/Post.php";
 require_once "./modules/Patch.php";
 require_once "./modules/Delete.php";
-require_once "./modules/Authentication.php";
+require_once "./modules/Auth.php";
 
 
 $db = new Connection();
