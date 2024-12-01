@@ -1,10 +1,59 @@
 <?php
+
 class Authentication {
 
     protected $pdo;
 
     public function __construct(\PDO $pdo) {
         $this->pdo = $pdo;
+    }
+
+    public function isAuthorized() {
+        $headers = array_change_key_case(getallheaders(), CASE_LOWER);
+        return $this->getToken() === $headers['authorization'];
+    }
+
+    private function getToken() {
+        $headers = array_change_key_case(getallheaders(), CASE_LOWER);
+
+        $sqlString = "SELECT token FROM users WHERE username=?";
+        try {
+            $stmt = $this->pdo->prepare($sqlString);
+            $stmt->execute([$headers['x-auth-user']]);
+            $result = $stmt->fetch();
+            return $result['token'];
+        } catch (Exception $e) {
+            echo $e->getMessage();
+        }
+        return "";
+    }
+
+    private function generateHeader() {
+        $header = [
+            "typ" => "JWT",
+            "alg" => "HS256",
+            "app" => "CrowdFundAPI",
+            "dev" => "Team NaN"
+        ];
+        return base64_encode(json_encode($header));
+    }
+
+    private function generatePayload($id, $username) {
+        $payload = [
+            "uid" => $id,
+            "uc" => $username,
+            "email" => "202311646@gordoncollge.edu.ph",
+            "date" => date("Y-m-d H:i:s"),
+            "exp" => date("Y-m-d H:i:s", strtotime("+1 day"))
+        ];
+        return base64_encode(json_encode($payload));
+    }
+
+    private function generateToken($id, $username) {
+        $header = $this->generateHeader();
+        $payload = $this->generatePayload($id, $username);
+        $signature = hash_hmac("sha256", "$header.$payload", TOKEN_KEY);
+        return "$header.$payload." . base64_encode($signature);
     }
 
     private function isSamePassword($inputPassword, $existingHash) {
@@ -26,6 +75,27 @@ class Authentication {
         return substr($mb64String, 0, $length);
     }
 
+    public function saveToken($token, $username) {
+        $errmsg = "";
+        $code = 0;
+
+        try {
+            $sqlString = "UPDATE users SET token=? WHERE username = ?";
+            $sql = $this->pdo->prepare($sqlString);
+            $sql->execute([$token, $username]);
+
+            $code = 200;
+            $data = null;
+
+            return ["data" => $data, "code" => $code];
+        } catch (\PDOException $e) {
+            $errmsg = $e->getMessage();
+            $code = 400;
+        }
+
+        return ["errmsg" => $errmsg, "code" => $code];
+    }
+
     public function login($body) {
         $username = $body->username;
         $password = $body->password;
@@ -36,17 +106,21 @@ class Authentication {
         $message = "";
 
         try {
-            $sqlString = "SELECT user_id, username, password, token FROM users WHERE username=?";
+            $sqlString = "SELECT userid, username, password, token FROM users WHERE username=?";
             $stmt = $this->pdo->prepare($sqlString);
             $stmt->execute([$username]);
 
             if ($stmt->rowCount() > 0) {
-                $result = $stmt->fetchAll()[0];
+                $result = $stmt->fetch();
                 if ($this->isSamePassword($password, $result['password'])) {
                     $code = 200;
                     $remarks = "success";
                     $message = "Logged in successfully";
-                    $payload = array("user_id" => $result['user_id'], "username" => $result['username'], "token" => $result['token']);
+
+                    $token = $this->generateToken($result['userid'], $result['username']);
+                    $token_arr = explode('.', $token);
+                    $this->saveToken($token_arr[2], $result['username']);
+                    $payload = ["userid" => $result['userid'], "username" => $result['username'], "token" => $token_arr[2]];
                 } else {
                     $code = 401;
                     $payload = null;
@@ -64,7 +138,8 @@ class Authentication {
             $remarks = "failed";
             $code = 400;
         }
-        return array("payload" => $payload, "remarks" => $remarks, "message" => $message, "code" => $code);
+
+        return ["payload" => $payload, "remarks" => $remarks, "message" => $message, "code" => $code];
     }
 
     public function addAccount($body) {
@@ -79,20 +154,21 @@ class Authentication {
         }
 
         try {
-            $sqlString = "INSERT INTO users(user_id, username, password) VALUES (?,?,?)";
+            $sqlString = "INSERT INTO users(userid, username, password) VALUES (?, ?, ?)";
             $sql = $this->pdo->prepare($sqlString);
             $sql->execute($values);
 
             $code = 200;
             $data = null;
 
-            return array("data" => $data, "code" => $code);
+            return ["data" => $data, "code" => $code];
         } catch (\PDOException $e) {
             $errmsg = $e->getMessage();
             $code = 400;
         }
 
-        return array("errmsg" => $errmsg, "code" => $code);
+        return ["errmsg" => $errmsg, "code" => $code];
     }
 }
+
 ?>
