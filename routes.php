@@ -1,84 +1,120 @@
 <?php
-require_once "./config/Database.php";
+
+// Import dependencies
+require_once "./config/database.php";
 require_once "./modules/Get.php";
 require_once "./modules/Post.php";
 require_once "./modules/Patch.php";
 require_once "./modules/Delete.php";
 require_once "./modules/Auth.php";
 
-
+// Initialize database connection
 $db = new Connection();
 $pdo = $db->connect();
 
-$Get = new Get($pdo);
-$Post = new Post($pdo);
-$Patch = new Patch($pdo);
-$Delete = new Delete($pdo);
-$Auth = new Authentication($pdo);
+// Instantiate module classes
+$post = new Post($pdo);
+$patch = new Patch($pdo);
+$get = new Get($pdo);
+$delete = new Delete($pdo);
+$auth = new Authentication($pdo);
 
+// Retrieve and parse request
 if (isset($_REQUEST['request'])) {
     $request = explode("/", $_REQUEST['request']);
 } else {
-    echo "URL does not exist.";
+    echo "Invalid URL.";
     exit;
 }
 
+// Handle HTTP request methods
 switch ($_SERVER['REQUEST_METHOD']) {
-    case 'GET':
+    case "GET":
+        if ($auth->isAuthorized()) {
+            switch ($request[0]) {
+                case "campaigns":
+                    echo json_encode($get->getCampaigns($request[1] ?? null));
+                    break;
+
+                case "pledges":
+                    echo json_encode($get->getPledges($request[1] ?? null));
+                    break;
+
+                case "users":
+                    echo json_encode($get->getUsers($request[1] ?? null));
+                    break;
+
+                default:
+                    http_response_code(404);
+                    echo "Invalid endpoint.";
+                    break;
+            }
+        } else {
+            http_response_code(401);
+            echo "Unauthorized access.";
+        }
+        break;
+
+    case "POST":
+        $body = json_decode(file_get_contents("php://input"), true);
         switch ($request[0]) {
-            case 'gettasks':
-                if (count($request) > 1) {
-                    echo json_encode($Get->getTaskinfo($request[1]));
-                } else {
-                    echo json_encode($Get->getTaskinfo());
-                }
+            case "login":
+                echo json_encode($auth->login($body));
                 break;
+
+            case "register":
+                echo json_encode($auth->registerUser($body));
+                break;
+
+            case "campaigns":
+                echo json_encode($post->createCampaign($body));
+                break;
+
+            case "pledges":
+                echo json_encode($post->createPledge($body));
+                break;
+
             default:
-                echo "Invalid request.";
+                http_response_code(400);
+                echo "Invalid endpoint.";
                 break;
         }
         break;
 
-    case 'POST':
+    case "PATCH":
+        $body = json_decode(file_get_contents("php://input"), true);
         switch ($request[0]) {
-            case 'posttasks':
-                $body = json_decode(file_get_contents("php://input"));
-                echo json_encode($Post->postTask($body));
+            case "campaigns":
+                echo json_encode($patch->updateCampaign($body, $request[1]));
                 break;
+
             default:
-                echo "Invalid request.";
+                http_response_code(400);
+                echo "Invalid endpoint.";
                 break;
         }
         break;
 
-    case 'PATCH':
-        $body = json_decode(file_get_contents("php://input"));
+    case "DELETE":
         switch ($request[0]) {
-            case 'updatetasks':
-                echo json_encode($Patch->updateTask($body, $request[1]));
+            case "campaigns":
+                echo json_encode($delete->deleteCampaign($request[1]));
                 break;
-            case 'archivetask':
-                echo json_encode($Patch->archiveTask($request[1]));
-                break;
-            default:
-                echo "Invalid request.";
-                break;
-        }
-        break;
 
-    case 'DELETE':
-        switch ($request[0]) {
-            case 'deletetasks':
-                echo json_encode($Delete->deleteTask($request[1]));
+            case "pledges":
+                echo json_encode($delete->deletePledge($request[1]));
                 break;
+
             default:
-                echo "Invalid request.";
+                http_response_code(400);
+                echo "Invalid endpoint.";
                 break;
         }
         break;
 
     default:
-        echo "Forbidden";
+        http_response_code(405);
+        echo "Invalid request method.";
         break;
 }
 ?>
