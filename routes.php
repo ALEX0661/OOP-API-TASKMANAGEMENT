@@ -67,7 +67,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 break;
 
             case "register":
-                echo json_encode($auth->registerUser($body));
+                echo json_encode($auth->addAccount($body));
                 break;
 
             case "campaigns":
