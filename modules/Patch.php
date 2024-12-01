@@ -1,58 +1,127 @@
 <?php
 class Patch {
+
     protected $pdo;
 
-    public function __construct(\PDO $pdo) {
+    public function __construct(\PDO $pdo){
         $this->pdo = $pdo;
     }
 
-    public function updateTask($body, $task_id) {
+    // Update Campaign details
+    public function updateCampaign($body, $id){
         $values = [];
         $errmsg = "";
         $code = 0;
 
-        foreach($body as $value){
+        // Collect all values from the request body
+        foreach ($body as $value) {
             array_push($values, $value);
         }
 
-        array_push($values, $task_id);
+        // Add the campaign ID to the values array
+        array_push($values, $id);
 
         try {
-            $sqlString = "UPDATE task SET title = ?, description = ?, priority = ?, status = ?, updated_at = ?, due_date = ?, updated_at = ? 
-                          WHERE task_id = ?";
+            // SQL query to update campaign details
+            $sqlString = "UPDATE campaigns_tbl SET title=?, description=?, goal=?, status=? WHERE id = ?";
             $sql = $this->pdo->prepare($sqlString);
             $sql->execute($values);
 
             $code = 200;
-            $data = "Task successfully updated.";
+            $data = null;
 
+            // Return the successful response
             return array("data" => $data, "code" => $code);
         } catch (\PDOException $e) {
             $errmsg = $e->getMessage();
             $code = 400;
         }
 
+        // Return the error response in case of failure
         return array("errmsg" => $errmsg, "code" => $code);
     }
 
-    public function archiveTask($task_id) {
+    // Archive a Campaign (soft delete)
+    public function archiveCampaign($id){
         $errmsg = "";
         $code = 0;
 
         try {
-            $sqlString = "UPDATE task SET isdeleted = 1 WHERE task_id = ?";
+            // SQL query to soft-delete the campaign by updating the 'isdeleted' flag
+            $sqlString = "UPDATE campaigns_tbl SET isdeleted=1 WHERE id = ?";
             $sql = $this->pdo->prepare($sqlString);
-            $sql->execute([$task_id]);
+            $sql->execute([$id]);
 
             $code = 200;
-            $data = "Task successfully archived.";
+            $data = null;
 
+            // Return the successful response
             return array("data" => $data, "code" => $code);
         } catch (\PDOException $e) {
             $errmsg = $e->getMessage();
             $code = 400;
         }
 
+        // Return the error response in case of failure
+        return array("errmsg" => $errmsg, "code" => $code);
+    }
+
+    // Update Pledge details
+    public function updatePledge($body, $id){
+        $values = [];
+        $errmsg = "";
+        $code = 0;
+
+        // Collect all values from the request body
+        foreach ($body as $value) {
+            array_push($values, $value);
+        }
+
+        // Add the pledge ID to the values array
+        array_push($values, $id);
+
+        try {
+            // SQL query to update pledge details
+            $sqlString = "UPDATE pledges_tbl SET amount=?, message=? WHERE id = ?";
+            $sql = $this->pdo->prepare($sqlString);
+            $sql->execute($values);
+
+            $code = 200;
+            $data = null;
+
+            // Return the successful response
+            return array("data" => $data, "code" => $code);
+        } catch (\PDOException $e) {
+            $errmsg = $e->getMessage();
+            $code = 400;
+        }
+
+        // Return the error response in case of failure
+        return array("errmsg" => $errmsg, "code" => $code);
+    }
+
+    // Archive a Pledge (soft delete)
+    public function archivePledge($id){
+        $errmsg = "";
+        $code = 0;
+
+        try {
+            // SQL query to soft-delete the pledge by updating the 'isdeleted' flag
+            $sqlString = "UPDATE pledges_tbl SET isdeleted=1 WHERE id = ?";
+            $sql = $this->pdo->prepare($sqlString);
+            $sql->execute([$id]);
+
+            $code = 200;
+            $data = null;
+
+            // Return the successful response
+            return array("data" => $data, "code" => $code);
+        } catch (\PDOException $e) {
+            $errmsg = $e->getMessage();
+            $code = 400;
+        }
+
+        // Return the error response in case of failure
         return array("errmsg" => $errmsg, "code" => $code);
     }
 }
