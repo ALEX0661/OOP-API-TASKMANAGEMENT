@@ -71,11 +71,11 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 break;
 
             case "campaigns":
-                echo json_encode($post->postCampaign($body));
+                echo json_encode($post->createCampaign($body));
                 break;
 
             case "pledges":
-                echo json_encode($post->postPledge($body));
+                echo json_encode($post->createPledge($body));
                 break;
 
             default:
