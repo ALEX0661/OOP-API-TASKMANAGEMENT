@@ -44,6 +44,10 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     echo json_encode($get->getUsers($request[1] ?? null));
                     break;
 
+                case "log":
+                    echo json_encode($get->getLogs($request[1] ?? date("Y-m-d")));
+                break;
+
                 default:
                     http_response_code(404);
                     echo "Invalid endpoint.";
@@ -67,11 +71,11 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 break;
 
             case "campaigns":
-                echo json_encode($post->createCampaign($body));
+                echo json_encode($post->postCampaign($body));
                 break;
 
             case "pledges":
-                echo json_encode($post->createPledge($body));
+                echo json_encode($post->postPledge($body));
                 break;
 
             default:
@@ -86,6 +90,18 @@ switch ($_SERVER['REQUEST_METHOD']) {
         switch ($request[0]) {
             case "campaigns":
                 echo json_encode($patch->updateCampaign($body, $request[1]));
+                break;
+
+            case "pledges":
+                echo json_encode($patch->updatePledge($body, $request[1]));
+                break;
+
+            case "archive_campaign":
+                echo json_encode($patch->archiveCampaign($request[1]));
+                break;
+
+            case "archive_pledge":
+                echo json_encode($patch->archivePledge($request[1]));
                 break;
 
             default:
