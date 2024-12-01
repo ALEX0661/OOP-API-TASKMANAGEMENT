@@ -1,36 +1,53 @@
 <?php
-class Post {
+include_once "Common.php";
+
+class Post extends Common {
+
     protected $pdo;
 
-    public function __construct(\PDO $pdo) {
+    public function __construct(\PDO $pdo){
         $this->pdo = $pdo;
     }
 
-    public function postTask($body) {
-        $values = [];
-        $errmsg = "";
-        $code = 0;
-
-        foreach($body as $value){
-            array_push($values, $value);
+    // Post new Campaign
+    public function createCampaign($body){
+        // Validate input data
+        if (empty($body['title']) || empty($body['goal'])) {
+            return $this->generateResponse(null, "failed", "Title and goal are required.", 400);
         }
 
-        try {
-            $sqlString = "INSERT INTO task (task_id, title, description, priority, status, due_date, created_at, updated_at) 
-                          VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-            $sql = $this->pdo->prepare($sqlString);
-            $sql->execute($values);
+        // Insert campaign data into the database
+        $result = $this->postData("campaigns_tbl", $body, $this->pdo);
 
-            $code = 200;
-            $data = "Task successfully created.";
-
-            return array("data" => $data, "code" => $code);
-        } catch (\PDOException $e) {
-            $errmsg = $e->getMessage();
-            $code = 400;
+        if ($result['code'] == 200) {
+            $this->logger("admin", "POST", "Created a new campaign: " . $body['title']);
+            return $this->generateResponse($result['data'], "success", "Successfully created a new campaign.", $result['code']);
         }
-
-        return array("errmsg" => $errmsg, "code" => $code);
+        
+        // Handle failure
+        $this->logger("admin", "POST", $result['errmsg']);
+        return $this->generateResponse(null, "failed", $result['errmsg'], $result['code']);
     }
+
+    // Post new Pledge
+    public function createPledge($body){
+        // Validate input data
+        if (empty($body['campaign_id']) || empty($body['amount'])) {
+            return $this->generateResponse(null, "failed", "Campaign ID and pledge amount are required.", 400);
+        }
+
+        // Insert pledge data into the database
+        $result = $this->postData("pledges_tbl", $body, $this->pdo);
+
+        if ($result['code'] == 200) {
+            $this->logger("user", "POST", "Created a new pledge for campaign ID: " . $body['campaign_id']);
+            return $this->generateResponse($result['data'], "success", "Successfully created a new pledge.", $result['code']);
+        }
+        
+        // Handle failure
+        $this->logger("user", "POST", $result['errmsg']);
+        return $this->generateResponse(null, "failed", $result['errmsg'], $result['code']);
+    }
+
 }
 ?>
