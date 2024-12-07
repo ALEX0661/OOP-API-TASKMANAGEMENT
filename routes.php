@@ -46,6 +46,10 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     echo $crypt->encryptData($dataString);
                     break;
 
+                case "log":
+                    echo json_encode($get->getLogs($request[1] ?? date("Y-m-d")));
+                break;
+
                 default:
                     http_response_code(401);
                     echo "Invalid endpoint.";
