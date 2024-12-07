@@ -5,64 +5,21 @@ class Get extends Common {
 
     protected $pdo;
 
-    public function __construct(\PDO $pdo){
+    public function __construct(\PDO $pdo) {
         $this->pdo = $pdo;
     }
 
-    // Get all campaigns or a specific campaign by ID
-    public function getCampaigns($id = null){
-        $condition = "isdeleted = 0";
-        if ($id != null) {
-            $condition .= " AND id = " . $id;
-        }
-
-        $result = $this->getDataByTable('campaigns_tbl', $condition, $this->pdo);
-
-        if ($result['code'] == 200) {
-            return $this->generateResponse($result['data'], "success", "Successfully retrieved campaigns.", $result['code']);
-        }
-        return $this->generateResponse(null, "failed", $result['errmsg'], $result['code']);
-    }
-
-    // Get all pledges or a specific pledge by ID
-    public function getPledges($id = null){
-        $condition = "isdeleted = 0";
-        if ($id != null) {
-            $condition .= " AND id = " . $id;
-        }
-
-        $result = $this->getDataByTable('pledges_tbl', $condition, $this->pdo);
-
-        if ($result['code'] == 200) {
-            return $this->generateResponse($result['data'], "success", "Successfully retrieved pledges.", $result['code']);
-        }
-        return $this->generateResponse(null, "failed", $result['errmsg'], $result['code']);
-    }
-
-    // Get all users or a specific user by ID
-    public function getUsers($id = null){
-        $condition = "isdeleted = 0";
-        if ($id != null) {
-            $condition .= " AND id = " . $id;
-        }
-
-        $result = $this->getDataByTable('users_tbl', $condition, $this->pdo);
-
-        if ($result['code'] == 200) {
-            return $this->generateResponse($result['data'], "success", "Successfully retrieved users.", $result['code']);
-        }
-        return $this->generateResponse(null, "failed", $result['errmsg'], $result['code']);
-    }
-
-    // Get logs for debugging (or for admin)
-    public function getLogs($date){
+    public function getLogs($date) {
         $filename = "./logs/" . $date . ".log";
-
         $logs = array();
+
         try {
             $file = new SplFileObject($filename);
             while (!$file->eof()) {
-                array_push($logs, $file->fgets());
+                $line = trim($file->fgets());
+                if (!empty($line)) {
+                    array_push($logs, $line);
+                }
             }
             $remarks = "success";
             $message = "Successfully retrieved logs.";
@@ -71,7 +28,33 @@ class Get extends Common {
             $message = $e->getMessage();
         }
 
-        return $this->generateResponse(array("logs" => $logs), $remarks, $message, 200);
+        return $this->generateResponse(["logs" => $logs], $remarks, $message, 200);
+    }
+
+    public function getCampaigns($id = null) {
+        $condition = "is_archived = 0";
+        if ($id !== null) {
+            $condition .= " AND id=" . intval($id);
+        }
+
+        $result = $this->getDataByTable('Campaigns_tbl', $condition, $this->pdo);
+        if ($result['code'] == 200) {
+            return $this->generateResponse($result['data'], "success", "Successfully retrieved records.", $result['code']);
+        }
+        return $this->generateResponse(null, "failed", $result['errmsg'], $result['code']);
+    }
+
+    public function getPledges($campaign_id = null) {
+        $condition = "1=1"; // Default to no filtering
+        if ($campaign_id !== null) {
+            $condition .= " AND campaign_id=" . intval($campaign_id);
+        }
+
+        $result = $this->getDataByTable('Pledges_tbl', $condition, $this->pdo);
+        if ($result['code'] == 200) {
+            return $this->generateResponse($result['data'], "success", "Successfully retrieved records.", $result['code']);
+        }
+        return $this->generateResponse(null, "failed", $result['errmsg'], $result['code']);
     }
 }
 ?>
