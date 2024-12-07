@@ -74,11 +74,11 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 echo json_encode($auth->addAccount($body));
                 break;
 
-            case "campaign":
+            case "postcampaign":
                 echo json_encode($post->createCampaign($body));
                 break;
 
-            case "pledge":
+            case "postpledge":
                 echo json_encode($post->createPledge($body));
                 break;
 
@@ -93,8 +93,20 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $body = json_decode(file_get_contents("php://input"), true);
         switch ($request[0]) {
 
-            case "campaign":
-                echo json_encode($patch->updateCampaign($body, $request[1]));
+            case "updatecampaign":
+                echo json_encode($patch->patchCampaign($body, $request[1]));
+                break;
+
+            case "archivecampaign":
+                echo json_encode($patch->archiveCampaign($request[1]));
+                break;
+
+            case "updatepledge":
+                echo json_encode($patch->patchPledge($body, $request[1]));
+                break;
+
+            case "archivepledge":
+                echo json_encode($patch->archivePledge($request[1]));
                 break;
 
             default:
@@ -107,8 +119,12 @@ switch ($_SERVER['REQUEST_METHOD']) {
     case "DELETE":
         switch ($request[0]) {
 
-            case "campaign":
-                echo json_encode($delete->archiveCampaign($request[1]));
+            case "delcampaign":
+                echo json_encode($delete->deleteCampaign($request[1]));
+                break;
+
+            case "delpledge":
+                echo json_encode($delete->deletepledge($request[1]));
                 break;
 
             default:
