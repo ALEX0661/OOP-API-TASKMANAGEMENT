@@ -7,7 +7,7 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 date_default_timezone_set("Asia/Manila");
 
 define("DB_SERVER", "localhost");
-define("DB_NAME", "fundlift");
+define("DB_NAME", "fundlift_db");
 define("DB_USER", "root");
 define("DB_PWORD", "");
 define("TOKEN_KEY", "12E1561FB866FE9D966538F2125A5");
