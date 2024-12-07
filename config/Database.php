@@ -10,6 +10,8 @@ define("DB_SERVER", "localhost");
 define("DB_NAME", "fundlift");
 define("DB_USER", "root");
 define("DB_PWORD", "");
+define("TOKEN_KEY", "12E1561FB866FE9D966538F2125A5");
+define("SECRET_KEY", "KIMSUNOO");
 
 class Connection {
     private $connectionstring;
