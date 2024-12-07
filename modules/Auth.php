@@ -1,5 +1,4 @@
 <?php
-
 class Authentication {
 
     protected $pdo;
@@ -9,6 +8,7 @@ class Authentication {
     }
 
     public function isAuthorized() {
+        // Compare request token to database token
         $headers = array_change_key_case(getallheaders(), CASE_LOWER);
         return $this->getToken() === $headers['authorization'];
     }
@@ -16,11 +16,11 @@ class Authentication {
     private function getToken() {
         $headers = array_change_key_case(getallheaders(), CASE_LOWER);
 
-        $sqlString = "SELECT token FROM users WHERE username=?";
+        $sqlString = "SELECT token FROM user_tbl WHERE username = ?";
         try {
             $stmt = $this->pdo->prepare($sqlString);
             $stmt->execute([$headers['x-auth-user']]);
-            $result = $stmt->fetch();
+            $result = $stmt->fetchAll()[0];
             return $result['token'];
         } catch (Exception $e) {
             echo $e->getMessage();
@@ -32,7 +32,7 @@ class Authentication {
         $header = [
             "typ" => "JWT",
             "alg" => "HS256",
-            "app" => "CrowdFundAPI",
+            "app" => "FundLift",
             "dev" => "Team NaN"
         ];
         return base64_encode(json_encode($header));
@@ -42,9 +42,9 @@ class Authentication {
         $payload = [
             "uid" => $id,
             "uc" => $username,
-            "email" => "202311646@gordoncollge.edu.ph",
-            "date" => date("Y-m-d H:i:s"),
-            "exp" => date("Y-m-d H:i:s", strtotime("+1 day"))
+            "email" => "user@example.com",
+            "date" => date_create(),
+            "exp" => date("Y-m-d H:i:s", strtotime('+1 hour'))
         ];
         return base64_encode(json_encode($payload));
     }
@@ -62,7 +62,7 @@ class Authentication {
     }
 
     private function encryptPassword($password) {
-        $hashFormat = "$2y$10$";
+        $hashFormat = "$2y$10$"; // Blowfish
         $saltLength = 22;
         $salt = $this->generateSalt($saltLength);
         return crypt($password, $hashFormat . $salt);
@@ -80,7 +80,7 @@ class Authentication {
         $code = 0;
 
         try {
-            $sqlString = "UPDATE users SET token=? WHERE username = ?";
+            $sqlString = "UPDATE user_tbl SET token = ? WHERE username = ?";
             $sql = $this->pdo->prepare($sqlString);
             $sql->execute([$token, $username]);
 
@@ -106,21 +106,21 @@ class Authentication {
         $message = "";
 
         try {
-            $sqlString = "SELECT userid, username, password, token FROM users WHERE username=?";
+            $sqlString = "SELECT id, username, password, token FROM user_tbl WHERE username = ?";
             $stmt = $this->pdo->prepare($sqlString);
             $stmt->execute([$username]);
 
             if ($stmt->rowCount() > 0) {
-                $result = $stmt->fetch();
+                $result = $stmt->fetchAll()[0];
                 if ($this->isSamePassword($password, $result['password'])) {
                     $code = 200;
                     $remarks = "success";
                     $message = "Logged in successfully";
 
-                    $token = $this->generateToken($result['userid'], $result['username']);
-                    $token_arr = explode('.', $token);
-                    $this->saveToken($token_arr[2], $result['username']);
-                    $payload = ["userid" => $result['userid'], "username" => $result['username'], "token" => $token_arr[2]];
+                    $token = $this->generateToken($result['id'], $result['username']);
+                    $tokenArr = explode('.', $token);
+                    $this->saveToken($tokenArr[2], $result['username']);
+                    $payload = ["id" => $result['id'], "username" => $result['username'], "token" => $tokenArr[2]];
                 } else {
                     $code = 401;
                     $payload = null;
@@ -138,7 +138,6 @@ class Authentication {
             $remarks = "failed";
             $code = 400;
         }
-
         return ["payload" => $payload, "remarks" => $remarks, "message" => $message, "code" => $code];
     }
 
@@ -154,7 +153,7 @@ class Authentication {
         }
 
         try {
-            $sqlString = "INSERT INTO users(userid, username, password) VALUES (?, ?, ?)";
+            $sqlString = "INSERT INTO user_tbl(username, password) VALUES (?, ?)";
             $sql = $this->pdo->prepare($sqlString);
             $sql->execute($values);
 
