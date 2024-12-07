@@ -10,7 +10,7 @@ class Post extends Common {
         $this->pdo = $pdo;
     }
 
-    public function postCampaign($body) {
+    public function createCampaign($body) {
         $result = $this->postData("Campaigns_tbl", $body, $this->pdo);
         if ($result['code'] == 200) {
             $this->logger($body['user_id'], "POST", "Created a new campaign record");
@@ -20,7 +20,7 @@ class Post extends Common {
         return $this->generateResponse(null, "failed", $result['errmsg'], $result['code']);
     }
 
-    public function postPledge($body) {
+    public function createPledge($body) {
         $result = $this->postData("Pledges_tbl", $body, $this->pdo);
         if ($result['code'] == 200) {
             $this->logger($body['user_id'], "POST", "Added a new pledge");
